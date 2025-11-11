@@ -1,0 +1,624 @@
+{
+    "schemes": [
+        "http",
+        "https"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "한국 우편번호 검색 API - 도로명주소 및 지번주소 지원\n행정안전부 우편번호 데이터를 기반으로 한 우편번호 검색 서비스입니다.",
+        "title": "Korean PostalCode API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "https://github.com/epicsagas/korean-postalcode",
+            "email": "support@example.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/api/v1/postal-codes/land/prefix/{prefix}": {
+            "get": {
+                "description": "우편번호 앞 3자리로 지번주소 검색 (인덱스 최적화로 3-5배 빠름)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PostalCodeLand"
+                ],
+                "summary": "우편번호 앞 3자리로 지번주소 빠른 검색 (권장)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "\"256\"",
+                        "description": "우편번호 앞 3자리",
+                        "name": "prefix",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "페이지 번호 (기본 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "페이지당 결과 개수 (기본 10, 최대 100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공",
+                        "schema": {
+                            "$ref": "#/definitions/http.SearchResponseLand"
+                        }
+                    },
+                    "400": {
+                        "description": "잘못된 요청",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/postal-codes/land/search": {
+            "get": {
+                "description": "시도, 시군구, 읍면동, 리명, 우편번호 등 여러 조건으로 검색 가능",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PostalCodeLand"
+                ],
+                "summary": "복합 조건으로 지번주소 우편번호 검색",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "우편번호 (5자리 정확 매칭)",
+                        "name": "zip_code",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "우편번호 앞 3자리 (권장, 빠른 검색)",
+                        "name": "zip_prefix",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "\"강원특별자치도\"",
+                        "description": "시도명 (부분 매칭)",
+                        "name": "sido_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "\"강릉시\"",
+                        "description": "시군구명 (부분 매칭)",
+                        "name": "sigungu_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "\"강동면\"",
+                        "description": "읍면동명 (부분 매칭)",
+                        "name": "eupmyeondong_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "\"모전리\"",
+                        "description": "리명 (부분 매칭)",
+                        "name": "ri_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "페이지 번호 (기본 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "페이지당 결과 개수 (기본 10, 최대 100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공",
+                        "schema": {
+                            "$ref": "#/definitions/http.SearchResponseLand"
+                        }
+                    },
+                    "400": {
+                        "description": "잘못된 요청",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "서버 오류",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/postal-codes/land/zipcode/{code}": {
+            "get": {
+                "description": "5자리 우편번호로 정확히 매칭되는 지번주소 조회",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PostalCodeLand"
+                ],
+                "summary": "우편번호로 지번주소 조회",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "\"25627\"",
+                        "description": "우편번호 (5자리)",
+                        "name": "code",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공",
+                        "schema": {
+                            "$ref": "#/definitions/http.SearchResponseLand"
+                        }
+                    },
+                    "400": {
+                        "description": "잘못된 요청",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "우편번호를 찾을 수 없음",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/postal-codes/road/prefix/{prefix}": {
+            "get": {
+                "description": "우편번호 앞 3자리로 검색 (인덱스 최적화로 3-5배 빠름)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PostalCodeRoad"
+                ],
+                "summary": "우편번호 앞 3자리로 빠른 검색 (권장)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "\"010\"",
+                        "description": "우편번호 앞 3자리",
+                        "name": "prefix",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "페이지 번호 (기본 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "페이지당 결과 개수 (기본 10, 최대 100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공",
+                        "schema": {
+                            "$ref": "#/definitions/http.SearchResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "잘못된 요청",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/postal-codes/road/search": {
+            "get": {
+                "description": "시도, 시군구, 도로명, 우편번호 등 여러 조건으로 검색 가능",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PostalCodeRoad"
+                ],
+                "summary": "복합 조건으로 우편번호 검색",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "우편번호 (5자리 정확 매칭)",
+                        "name": "zip_code",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "우편번호 앞 3자리 (권장, 빠른 검색)",
+                        "name": "zip_prefix",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "\"서울특별시\"",
+                        "description": "시도명 (부분 매칭)",
+                        "name": "sido_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "\"강북구\"",
+                        "description": "시군구명 (부분 매칭)",
+                        "name": "sigungu_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "\"삼양로\"",
+                        "description": "도로명 (부분 매칭)",
+                        "name": "road_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "페이지 번호 (기본 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "페이지당 결과 개수 (기본 10, 최대 100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공",
+                        "schema": {
+                            "$ref": "#/definitions/http.SearchResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "잘못된 요청",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "서버 오류",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/postal-codes/road/zipcode/{code}": {
+            "get": {
+                "description": "5자리 우편번호로 정확히 매칭되는 도로명 주소 조회",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PostalCodeRoad"
+                ],
+                "summary": "우편번호로 주소 조회",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "\"01000\"",
+                        "description": "우편번호 (5자리)",
+                        "name": "code",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "성공",
+                        "schema": {
+                            "$ref": "#/definitions/http.SearchResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "잘못된 요청",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "우편번호를 찾을 수 없음",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "http.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "잘못된 요청"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": false
+                }
+            }
+        },
+        "http.SearchResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/postalcode.PostalCodeRoad"
+                    }
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "total": {
+                    "type": "integer",
+                    "example": 10
+                }
+            }
+        },
+        "http.SearchResponseLand": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/postalcode.PostalCodeLand"
+                    }
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "total": {
+                    "type": "integer",
+                    "example": 10
+                }
+            }
+        },
+        "postalcode.PostalCodeLand": {
+            "description": "한국 우편번호 및 지번주소 정보 (행정안전부 지번주소 데이터)",
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "description": "타임스탬프",
+                    "type": "string",
+                    "example": "2024-01-01T00:00:00Z"
+                },
+                "end_jibun_main": {
+                    "type": "integer",
+                    "example": 878
+                },
+                "end_jibun_sub": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "eupmyeondong_name": {
+                    "type": "string",
+                    "example": "강동면"
+                },
+                "eupmyeondong_name_en": {
+                    "type": "string",
+                    "example": "Gangdong-myeon"
+                },
+                "haengjeongdong_name": {
+                    "description": "행정동",
+                    "type": "string",
+                    "example": ""
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "is_mountain": {
+                    "description": "산여부",
+                    "type": "boolean",
+                    "example": false
+                },
+                "ri_name": {
+                    "description": "리명",
+                    "type": "string",
+                    "example": "모전리"
+                },
+                "sido_name": {
+                    "description": "행정구역",
+                    "type": "string",
+                    "example": "강원특별자치도"
+                },
+                "sido_name_en": {
+                    "type": "string",
+                    "example": "Gangwon-do"
+                },
+                "sigungu_name": {
+                    "type": "string",
+                    "example": "강릉시"
+                },
+                "sigungu_name_en": {
+                    "type": "string",
+                    "example": "Gangneung-si"
+                },
+                "start_jibun_main": {
+                    "description": "주번지 범위",
+                    "type": "integer",
+                    "example": 2
+                },
+                "start_jibun_sub": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-01T00:00:00Z"
+                },
+                "zip_code": {
+                    "description": "우편번호 (주 조회 키)",
+                    "type": "string",
+                    "example": "25627"
+                },
+                "zip_prefix": {
+                    "type": "string",
+                    "example": "256"
+                }
+            }
+        },
+        "postalcode.PostalCodeRoad": {
+            "description": "한국 우편번호 및 도로명 주소 정보 (행정안전부 도로명주소 데이터)",
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "description": "타임스탬프",
+                    "type": "string",
+                    "example": "2024-01-01T00:00:00Z"
+                },
+                "end_building_main": {
+                    "type": "integer",
+                    "example": 126
+                },
+                "end_building_sub": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "eupmyeon_name": {
+                    "type": "string",
+                    "example": ""
+                },
+                "eupmyeon_name_en": {
+                    "type": "string",
+                    "example": ""
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "is_underground": {
+                    "description": "지하여부",
+                    "type": "boolean",
+                    "example": false
+                },
+                "range_type": {
+                    "description": "범위종류",
+                    "type": "integer",
+                    "example": 3
+                },
+                "road_name": {
+                    "description": "도로명",
+                    "type": "string",
+                    "example": "삼양로177길"
+                },
+                "road_name_en": {
+                    "type": "string",
+                    "example": "Samyang-ro 177-gil"
+                },
+                "sido_name": {
+                    "description": "행정구역",
+                    "type": "string",
+                    "example": "서울특별시"
+                },
+                "sido_name_en": {
+                    "type": "string",
+                    "example": "Seoul"
+                },
+                "sigungu_name": {
+                    "type": "string",
+                    "example": "강북구"
+                },
+                "sigungu_name_en": {
+                    "type": "string",
+                    "example": "Gangbuk-gu"
+                },
+                "start_building_main": {
+                    "description": "건물번호 범위",
+                    "type": "integer",
+                    "example": 93
+                },
+                "start_building_sub": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-01T00:00:00Z"
+                },
+                "zip_code": {
+                    "description": "우편번호 (주 조회 키)",
+                    "type": "string",
+                    "example": "01000"
+                },
+                "zip_prefix": {
+                    "type": "string",
+                    "example": "010"
+                }
+            }
+        }
+    }
+}

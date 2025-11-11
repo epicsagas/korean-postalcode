@@ -1,0 +1,441 @@
+basePath: /
+definitions:
+  http.ErrorResponse:
+    properties:
+      error:
+        example: 잘못된 요청
+        type: string
+      success:
+        example: false
+        type: boolean
+    type: object
+  http.SearchResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/postalcode.PostalCodeRoad'
+        type: array
+      success:
+        example: true
+        type: boolean
+      total:
+        example: 10
+        type: integer
+    type: object
+  http.SearchResponseLand:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/postalcode.PostalCodeLand'
+        type: array
+      success:
+        example: true
+        type: boolean
+      total:
+        example: 10
+        type: integer
+    type: object
+  postalcode.PostalCodeLand:
+    description: 한국 우편번호 및 지번주소 정보 (행정안전부 지번주소 데이터)
+    properties:
+      created_at:
+        description: 타임스탬프
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      end_jibun_main:
+        example: 878
+        type: integer
+      end_jibun_sub:
+        example: 0
+        type: integer
+      eupmyeondong_name:
+        example: 강동면
+        type: string
+      eupmyeondong_name_en:
+        example: Gangdong-myeon
+        type: string
+      haengjeongdong_name:
+        description: 행정동
+        example: ""
+        type: string
+      id:
+        example: 1
+        type: integer
+      is_mountain:
+        description: 산여부
+        example: false
+        type: boolean
+      ri_name:
+        description: 리명
+        example: 모전리
+        type: string
+      sido_name:
+        description: 행정구역
+        example: 강원특별자치도
+        type: string
+      sido_name_en:
+        example: Gangwon-do
+        type: string
+      sigungu_name:
+        example: 강릉시
+        type: string
+      sigungu_name_en:
+        example: Gangneung-si
+        type: string
+      start_jibun_main:
+        description: 주번지 범위
+        example: 2
+        type: integer
+      start_jibun_sub:
+        example: 3
+        type: integer
+      updated_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      zip_code:
+        description: 우편번호 (주 조회 키)
+        example: "25627"
+        type: string
+      zip_prefix:
+        example: "256"
+        type: string
+    type: object
+  postalcode.PostalCodeRoad:
+    description: 한국 우편번호 및 도로명 주소 정보 (행정안전부 도로명주소 데이터)
+    properties:
+      created_at:
+        description: 타임스탬프
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      end_building_main:
+        example: 126
+        type: integer
+      end_building_sub:
+        example: 0
+        type: integer
+      eupmyeon_name:
+        example: ""
+        type: string
+      eupmyeon_name_en:
+        example: ""
+        type: string
+      id:
+        example: 1
+        type: integer
+      is_underground:
+        description: 지하여부
+        example: false
+        type: boolean
+      range_type:
+        description: 범위종류
+        example: 3
+        type: integer
+      road_name:
+        description: 도로명
+        example: 삼양로177길
+        type: string
+      road_name_en:
+        example: Samyang-ro 177-gil
+        type: string
+      sido_name:
+        description: 행정구역
+        example: 서울특별시
+        type: string
+      sido_name_en:
+        example: Seoul
+        type: string
+      sigungu_name:
+        example: 강북구
+        type: string
+      sigungu_name_en:
+        example: Gangbuk-gu
+        type: string
+      start_building_main:
+        description: 건물번호 범위
+        example: 93
+        type: integer
+      start_building_sub:
+        example: 0
+        type: integer
+      updated_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      zip_code:
+        description: 우편번호 (주 조회 키)
+        example: "01000"
+        type: string
+      zip_prefix:
+        example: "010"
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+    url: https://github.com/epicsagas/korean-postalcode
+  description: |-
+    한국 우편번호 검색 API - 도로명주소 및 지번주소 지원
+    행정안전부 우편번호 데이터를 기반으로 한 우편번호 검색 서비스입니다.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Korean PostalCode API
+  version: "1.0"
+paths:
+  /api/v1/postal-codes/land/prefix/{prefix}:
+    get:
+      consumes:
+      - application/json
+      description: 우편번호 앞 3자리로 지번주소 검색 (인덱스 최적화로 3-5배 빠름)
+      parameters:
+      - description: 우편번호 앞 3자리
+        example: '"256"'
+        in: path
+        name: prefix
+        required: true
+        type: string
+      - default: 1
+        description: 페이지 번호 (기본 1)
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 페이지당 결과 개수 (기본 10, 최대 100)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공
+          schema:
+            $ref: '#/definitions/http.SearchResponseLand'
+        "400":
+          description: 잘못된 요청
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: 우편번호 앞 3자리로 지번주소 빠른 검색 (권장)
+      tags:
+      - PostalCodeLand
+  /api/v1/postal-codes/land/search:
+    get:
+      consumes:
+      - application/json
+      description: 시도, 시군구, 읍면동, 리명, 우편번호 등 여러 조건으로 검색 가능
+      parameters:
+      - description: 우편번호 (5자리 정확 매칭)
+        in: query
+        name: zip_code
+        type: string
+      - description: 우편번호 앞 3자리 (권장, 빠른 검색)
+        in: query
+        name: zip_prefix
+        type: string
+      - description: 시도명 (부분 매칭)
+        example: '"강원특별자치도"'
+        in: query
+        name: sido_name
+        type: string
+      - description: 시군구명 (부분 매칭)
+        example: '"강릉시"'
+        in: query
+        name: sigungu_name
+        type: string
+      - description: 읍면동명 (부분 매칭)
+        example: '"강동면"'
+        in: query
+        name: eupmyeondong_name
+        type: string
+      - description: 리명 (부분 매칭)
+        example: '"모전리"'
+        in: query
+        name: ri_name
+        type: string
+      - default: 1
+        description: 페이지 번호 (기본 1)
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 페이지당 결과 개수 (기본 10, 최대 100)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공
+          schema:
+            $ref: '#/definitions/http.SearchResponseLand'
+        "400":
+          description: 잘못된 요청
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: 서버 오류
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: 복합 조건으로 지번주소 우편번호 검색
+      tags:
+      - PostalCodeLand
+  /api/v1/postal-codes/land/zipcode/{code}:
+    get:
+      consumes:
+      - application/json
+      description: 5자리 우편번호로 정확히 매칭되는 지번주소 조회
+      parameters:
+      - description: 우편번호 (5자리)
+        example: '"25627"'
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공
+          schema:
+            $ref: '#/definitions/http.SearchResponseLand'
+        "400":
+          description: 잘못된 요청
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: 우편번호를 찾을 수 없음
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: 우편번호로 지번주소 조회
+      tags:
+      - PostalCodeLand
+  /api/v1/postal-codes/road/prefix/{prefix}:
+    get:
+      consumes:
+      - application/json
+      description: 우편번호 앞 3자리로 검색 (인덱스 최적화로 3-5배 빠름)
+      parameters:
+      - description: 우편번호 앞 3자리
+        example: '"010"'
+        in: path
+        name: prefix
+        required: true
+        type: string
+      - default: 1
+        description: 페이지 번호 (기본 1)
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 페이지당 결과 개수 (기본 10, 최대 100)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공
+          schema:
+            $ref: '#/definitions/http.SearchResponse'
+        "400":
+          description: 잘못된 요청
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: 우편번호 앞 3자리로 빠른 검색 (권장)
+      tags:
+      - PostalCodeRoad
+  /api/v1/postal-codes/road/search:
+    get:
+      consumes:
+      - application/json
+      description: 시도, 시군구, 도로명, 우편번호 등 여러 조건으로 검색 가능
+      parameters:
+      - description: 우편번호 (5자리 정확 매칭)
+        in: query
+        name: zip_code
+        type: string
+      - description: 우편번호 앞 3자리 (권장, 빠른 검색)
+        in: query
+        name: zip_prefix
+        type: string
+      - description: 시도명 (부분 매칭)
+        example: '"서울특별시"'
+        in: query
+        name: sido_name
+        type: string
+      - description: 시군구명 (부분 매칭)
+        example: '"강북구"'
+        in: query
+        name: sigungu_name
+        type: string
+      - description: 도로명 (부분 매칭)
+        example: '"삼양로"'
+        in: query
+        name: road_name
+        type: string
+      - default: 1
+        description: 페이지 번호 (기본 1)
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 페이지당 결과 개수 (기본 10, 최대 100)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공
+          schema:
+            $ref: '#/definitions/http.SearchResponse'
+        "400":
+          description: 잘못된 요청
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: 서버 오류
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: 복합 조건으로 우편번호 검색
+      tags:
+      - PostalCodeRoad
+  /api/v1/postal-codes/road/zipcode/{code}:
+    get:
+      consumes:
+      - application/json
+      description: 5자리 우편번호로 정확히 매칭되는 도로명 주소 조회
+      parameters:
+      - description: 우편번호 (5자리)
+        example: '"01000"'
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 성공
+          schema:
+            $ref: '#/definitions/http.SearchResponse'
+        "400":
+          description: 잘못된 요청
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: 우편번호를 찾을 수 없음
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: 우편번호로 주소 조회
+      tags:
+      - PostalCodeRoad
+schemes:
+- http
+- https
+swagger: "2.0"
