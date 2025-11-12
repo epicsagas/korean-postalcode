@@ -257,6 +257,169 @@ curl "http://localhost:8080/api/v1/postal-codes/road/search?sido_name=서울&lim
 
 ---
 
+## 🏠 지번주소 API
+
+지번주소 조회를 위한 REST API 엔드포인트입니다.
+
+### 1. 정확한 우편번호로 지번주소 조회
+
+**엔드포인트**: `GET /api/v1/postal-codes/land/zipcode/{code}`
+
+**목적**: 5자리 우편번호로 지번주소 조회
+
+**경로 파라미터**:
+| 파라미터 | 타입 | 필수 | 설명 |
+|---------|------|-----|------|
+| `code` | string | Yes | 5자리 우편번호 |
+
+**요청 예시**:
+```bash
+curl http://localhost:8080/api/v1/postal-codes/land/zipcode/25627
+```
+
+**응답 예시** (200 OK):
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "zip_code": "25627",
+      "zip_prefix": "256",
+      "sido_name": "강원특별자치도",
+      "sido_name_en": "Gangwon-do",
+      "sigungu_name": "강릉시",
+      "sigungu_name_en": "Gangneung-si",
+      "eupmyeondong_name": "강동면",
+      "eupmyeondong_name_en": "Gangdong-myeon",
+      "ri_name": "모전리",
+      "haengjeongdong_name": "강동면",
+      "is_mountain": false,
+      "start_jibun_main": 21,
+      "start_jibun_sub": 0,
+      "end_jibun_main": 198,
+      "end_jibun_sub": 0,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "total": 2
+}
+```
+
+---
+
+### 2. 우편번호 prefix로 지번주소 빠른 검색
+
+**엔드포인트**: `GET /api/v1/postal-codes/land/prefix/{prefix}`
+
+**목적**: 우편번호 앞 3자리로 지번주소 빠른 검색
+
+**경로 파라미터**:
+| 파라미터 | 타입 | 필수 | 설명 |
+|---------|------|-----|------|
+| `prefix` | string | Yes | 우편번호 앞 3자리 |
+
+**요청 예시**:
+```bash
+curl http://localhost:8080/api/v1/postal-codes/land/prefix/256
+```
+
+**응답 예시** (200 OK):
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "zip_code": "25627",
+      "zip_prefix": "256",
+      "sido_name": "강원특별자치도",
+      "sigungu_name": "강릉시",
+      "eupmyeondong_name": "강동면",
+      "ri_name": "모전리",
+      "is_mountain": false,
+      "start_jibun_main": 21
+    },
+    {
+      "id": 2,
+      "zip_code": "25628",
+      "zip_prefix": "256",
+      "sido_name": "강원특별자치도",
+      "sigungu_name": "강릉시",
+      "eupmyeondong_name": "강동면",
+      "ri_name": "산계리",
+      "is_mountain": false,
+      "start_jibun_main": 1
+    }
+    // ... 더 많은 결과
+  ],
+  "total": 856
+}
+```
+
+---
+
+### 3. 지번주소 복합 검색
+
+**엔드포인트**: `GET /api/v1/postal-codes/land/search`
+
+**목적**: 시도, 시군구, 읍면동, 리명 등 여러 조건으로 유연한 검색
+
+**쿼리 파라미터**:
+| 파라미터 | 타입 | 필수 | 설명 | 예시 |
+|---------|------|-----|------|------|
+| `zip_code` | string | No | 우편번호 (5자리 정확 매칭) | `25627` |
+| `zip_prefix` | string | No | 우편번호 앞 3자리 (권장, 빠름) | `256` |
+| `sido_name` | string | No | 시도명 (부분 매칭) | `강원` |
+| `sigungu_name` | string | No | 시군구명 (부분 매칭) | `강릉` |
+| `eupmyeondong_name` | string | No | 읍면동명 (부분 매칭) | `강동면` |
+| `ri_name` | string | No | 리명 (부분 매칭) | `모전리` |
+| `limit` | int | No | 결과 개수 제한 (기본 100, 최대 1000) | `100` |
+| `offset` | int | No | 페이징 오프셋 (기본 0) | `0` |
+
+**사용 시나리오**:
+
+#### 1) 시도명으로 검색
+```bash
+curl "http://localhost:8080/api/v1/postal-codes/land/search?sido_name=강원&limit=10"
+```
+
+#### 2) 복합 조건 검색
+```bash
+curl "http://localhost:8080/api/v1/postal-codes/land/search?sido_name=강원&eupmyeondong_name=강동면&ri_name=모전리"
+```
+
+#### 3) prefix로 빠른 검색 후 필터링
+```bash
+curl "http://localhost:8080/api/v1/postal-codes/land/search?zip_prefix=256&sigungu_name=강릉"
+```
+
+**응답 예시** (200 OK):
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "zip_code": "25627",
+      "zip_prefix": "256",
+      "sido_name": "강원특별자치도",
+      "sigungu_name": "강릉시",
+      "eupmyeondong_name": "강동면",
+      "ri_name": "모전리",
+      "is_mountain": false,
+      "start_jibun_main": 21,
+      "end_jibun_main": 198
+    }
+    // ... 더 많은 결과
+  ],
+  "total": 15
+}
+```
+
+---
+
 ## 📊 응답 형식
 
 ### 성공 응답 구조

@@ -30,6 +30,9 @@ type Repository interface {
 	// Delete는 우편번호 데이터를 삭제합니다.
 	Delete(id uint) error
 
+	// TruncateRoad는 도로명주소 테이블의 모든 데이터를 삭제합니다.
+	TruncateRoad() error
+
 	// 지번주소 관련 메서드
 	// FindLandByZipCode는 우편번호로 지번주소를 조회합니다.
 	FindLandByZipCode(zipCode string) ([]postalcode.PostalCodeLand, error)
@@ -51,6 +54,9 @@ type Repository interface {
 
 	// DeleteLand는 지번주소 데이터를 삭제합니다.
 	DeleteLand(id uint) error
+
+	// TruncateLand는 지번주소 테이블의 모든 데이터를 삭제합니다.
+	TruncateLand() error
 }
 
 // gormRepository는 GORM 기반 Repository 구현입니다.
@@ -165,6 +171,30 @@ func (r *gormRepository) Delete(id uint) error {
 	return r.db.Delete(&postalcode.PostalCodeRoad{}, id).Error
 }
 
+// TruncateRoad는 도로명주소 테이블의 모든 데이터를 삭제합니다.
+func (r *gormRepository) TruncateRoad() error {
+	// MySQL과 SQLite 모두 지원
+	// MySQL의 경우 TRUNCATE가 빠르지만, SQLite는 DELETE를 사용
+	dialect := r.db.Dialector.Name()
+
+	if dialect == "mysql" {
+		return r.db.Exec("TRUNCATE TABLE postal_code_roads").Error
+	}
+
+	// SQLite 또는 다른 DB의 경우
+	// 1. 모든 데이터 삭제
+	if err := r.db.Exec("DELETE FROM postal_code_roads").Error; err != nil {
+		return err
+	}
+
+	// 2. AUTO_INCREMENT 리셋 (SQLite의 경우)
+	if dialect == "sqlite" {
+		return r.db.Exec("DELETE FROM sqlite_sequence WHERE name='postal_code_roads'").Error
+	}
+
+	return nil
+}
+
 // ============================================================
 // 지번주소 관련 메서드
 // ============================================================
@@ -272,4 +302,28 @@ func (r *gormRepository) UpdateLand(land *postalcode.PostalCodeLand) error {
 // DeleteLand는 지번주소 데이터를 삭제합니다.
 func (r *gormRepository) DeleteLand(id uint) error {
 	return r.db.Delete(&postalcode.PostalCodeLand{}, id).Error
+}
+
+// TruncateLand는 지번주소 테이블의 모든 데이터를 삭제합니다.
+func (r *gormRepository) TruncateLand() error {
+	// MySQL과 SQLite 모두 지원
+	// MySQL의 경우 TRUNCATE가 빠르지만, SQLite는 DELETE를 사용
+	dialect := r.db.Dialector.Name()
+
+	if dialect == "mysql" {
+		return r.db.Exec("TRUNCATE TABLE postal_code_lands").Error
+	}
+
+	// SQLite 또는 다른 DB의 경우
+	// 1. 모든 데이터 삭제
+	if err := r.db.Exec("DELETE FROM postal_code_lands").Error; err != nil {
+		return err
+	}
+
+	// 2. AUTO_INCREMENT 리셋 (SQLite의 경우)
+	if dialect == "sqlite" {
+		return r.db.Exec("DELETE FROM sqlite_sequence WHERE name='postal_code_lands'").Error
+	}
+
+	return nil
 }

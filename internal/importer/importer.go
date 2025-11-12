@@ -76,6 +76,13 @@ func (imp *importer) ImportFromFile(filePath string, batchSize int, progressFn p
 		batchSize = 1000
 	}
 
+	// 기존 데이터 truncate (새로운 데이터로 완전히 교체)
+	fmt.Println("🗑️  기존 도로명주소 데이터 삭제 중...")
+	if err := imp.service.TruncateRoad(); err != nil {
+		return nil, fmt.Errorf("failed to truncate existing data: %w", err)
+	}
+	fmt.Println("✅ 기존 데이터 삭제 완료")
+
 	// Count total lines in file (excluding header)
 	totalLines, err := countDataLines(filePath)
 	if err != nil {
@@ -259,6 +266,13 @@ func (imp *importer) ImportLandFromFile(filePath string, batchSize int, progress
 	if batchSize <= 0 {
 		batchSize = 1000
 	}
+
+	// 기존 데이터 truncate (새로운 데이터로 완전히 교체)
+	fmt.Println("🗑️  기존 지번주소 데이터 삭제 중...")
+	if err := imp.service.TruncateLand(); err != nil {
+		return nil, fmt.Errorf("failed to truncate existing data: %w", err)
+	}
+	fmt.Println("✅ 기존 데이터 삭제 완료")
 
 	// Count total lines in file (excluding header)
 	totalLines, err := countDataLines(filePath)

@@ -35,23 +35,40 @@ func main() {
 
 ## 데이터 Import
 
-### 방법 1: Shell 스크립트 사용 (권장)
+### 1. 데이터 다운로드
 
-가장 쉬운 방법은 제공되는 shell 스크립트를 사용하는 것입니다:
+먼저 우체국에서 최신 데이터를 다운로드합니다:
+
+**다운로드 링크**: [우체국 우편번호 서비스](https://www.epost.go.kr/search/zipcode/areacdAddressDown.jsp)
+
+1. 위 링크 접속
+2. **"범위주소 DB"** 다운로드 후 압축해제
+3. 파일 준비:
+```bash
+cp ~/Downloads/도로명주소*.txt data/road_address.txt
+cp ~/Downloads/지번주소*.txt data/land_address.txt
+```
+
+### 2. Shell 스크립트로 Import (권장)
 
 ```bash
-# 도로명주소 Import
+# 도로명주소 데이터 import
 ./scripts/import.sh \
-    "user:pass@tcp(localhost:3306)/dbname" \
-    "data/20251111_road_name.txt" \
-    1000
+    -file "data/road_address.txt" \
+    -type road \
+    -batch 1000
 
-# 지번주소 Import
+# 지번주소 데이터 import
 ./scripts/import.sh \
-    "user:pass@tcp(localhost:3306)/dbname" \
-    "data/20251111_jibun.txt" \
-    1000 \
-    land
+    -file "data/land_address.txt" \
+    -type land \
+    -batch 1000
+
+# DSN 직접 지정
+./scripts/import.sh \
+    -dsn "user:pass@tcp(localhost:3306)/dbname" \
+    -file "data/road_address.txt" \
+    -type road
 ```
 
 **장점**:
@@ -60,9 +77,11 @@ func main() {
 - ✅ 진행 상황 실시간 표시
 - ✅ 에러 자동 처리 및 로깅
 
-### 방법 2: 패키지 Importer 사용
+⚠️ **중요**: Import 시 기존 데이터가 자동으로 TRUNCATE되고 새 데이터로 대체됩니다.
 
-프로그래밍 방식으로 import하려면 패키지를 직접 사용할 수 있습니다:
+### 3. 패키지 Importer 사용
+
+프로그래밍 방식으로 import하려면:
 
 ```go
 package main
@@ -86,34 +105,49 @@ func main() {
             current, total, float64(current)/float64(total)*100)
     }
 
-    // Import 실행
+    // 도로명주소 import (기존 데이터 자동 TRUNCATE)
     result, err := importer.ImportFromFile(
-        "data/postal_codes.txt",
+        "data/road_address.txt",
         1000, // batch size
         progressFn,
     )
 
-    if err != nil {
-        panic(err)
-    }
-
-    fmt.Printf("Success: %d, Errors: %d, Duration: %s\n",
-        result.TotalCount, result.ErrorCount, result.Duration)
+    // 지번주소 import (기존 데이터 자동 TRUNCATE)
+    landResult, err := importer.ImportLandFromFile(
+        "data/land_address.txt",
+        1000,
+        progressFn,
+    )
 }
 ```
 
-### 방법 3: CLI 도구 사용
+💡 **Import 동작**: Import는 항상 기존 테이블 데이터를 TRUNCATE한 후 새 데이터를 삽입합니다.
+
+### 4. CLI 도구 사용
 
 ```bash
 # 빌드
-go build -o postalcode-import cmd/address-import/main.go
+go build -o postalcode-import cmd/postalcode-import/main.go
 
-# 실행
+# 도로명주소 import
 ./postalcode-import \
-    -config configs/config.yaml \
-    -file data/postal_codes.txt \
+    -file "data/road_address.txt" \
+    -type road \
+    -batch 1000
+
+# 지번주소 import (DSN 직접 지정)
+./postalcode-import \
+    -dsn "user:pass@tcp(localhost:3306)/dbname" \
+    -file "data/land_address.txt" \
+    -type land \
     -batch 1000
 ```
+
+**플래그 설명**:
+- `-file`: 데이터 파일 경로 (필수)
+- `-type`: 데이터 타입 - `road` 또는 `land` (필수)
+- `-dsn`: MySQL DSN (선택, 없으면 .env 사용)
+- `-batch`: 배치 크기 (기본: 1000)
 
 ### 파일 형식
 

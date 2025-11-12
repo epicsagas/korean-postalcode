@@ -214,23 +214,33 @@ mysql -u root -p postalcode < ../../migrations/create_postal_code_lands.sql
 
 ## 📦 데이터 Import
 
+### 1. 데이터 다운로드
+
+우체국에서 최신 데이터를 다운로드합니다:
+- [우체국 우편번호 서비스](https://www.epost.go.kr/search/zipcode/areacdAddressDown.jsp)
+- **"범위주소 DB"** 다운로드 후 압축해제
+
+### 2. 데이터 Import
+
 서버 실행 전에 데이터를 import하세요:
 
 ```bash
 # 도로명주소 데이터
 cd ../postalcode-import
 ./postalcode-import \
-    -dsn "user:pass@tcp(localhost:3306)/dbname" \
-    -file "../../data/20251111_road_name.txt" \
+    -file "../../data/road_address.txt" \
+    -type road \
     -batch 1000
 
 # 지번주소 데이터
 ./postalcode-import \
     -dsn "user:pass@tcp(localhost:3306)/dbname" \
-    -file "../../data/20251111_land_rot.txt" \
+    -file "../../data/land_address.txt" \
     -type land \
     -batch 1000
 ```
+
+⚠️ **주의**: Import 시 기존 데이터가 자동으로 TRUNCATE되고 새 데이터로 대체됩니다.
 
 ## 🐳 Docker (선택사항)
 

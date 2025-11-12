@@ -229,32 +229,63 @@ curl "http://localhost:8080/api/v1/postal-codes/land/search?sido_name=강원&eup
 
 ## 📊 데이터 Import
 
-### Shell 스크립트 (권장)
+### 1. 데이터 다운로드 (우체국)
+
+먼저 우체국 사이트에서 최신 우편번호 데이터를 다운로드합니다:
+
+**다운로드 링크**: [우체국 우편번호 서비스](https://www.epost.go.kr/search/zipcode/areacdAddressDown.jsp)
+
+**다운로드 방법**:
+1. 위 링크 접속
+2. **"범위주소 DB"** 다운로드 후 압축해제
+
+**파일 준비**:
+```bash
+# 프로젝트의 data 디렉토리에 다운로드한 파일 복사
+cp ~/Downloads/도로명주소*.txt data/road_address.txt
+cp ~/Downloads/지번주소*.txt data/land_address.txt
+```
+
+💡 **참고**:
+- 우체국 사이트의 파일명은 날짜별로 다를 수 있습니다 (예: `20251111_도로명주소.txt`)
+- 파일 형식은 파이프(`|`) 구분자를 사용하는 TXT 파일입니다
+- 파일 크기가 클 수 있으므로 (수백 MB), 다운로드에 시간이 걸릴 수 있습니다
+
+### 2. Shell 스크립트로 Import (권장)
 
 가장 쉬운 방법은 제공되는 shell 스크립트를 사용하는 것입니다:
 
 ```bash
 # 도로명주소 데이터 import
 ./scripts/import.sh \
-    "user:pass@tcp(localhost:3306)/dbname" \
-    "data/20251111_road_name.txt" \
-    1000
+    -file "data/road_address.txt" \
+    -type road \
+    -batch 1000
 
 # 지번주소 데이터 import
 ./scripts/import.sh \
-    "user:pass@tcp(localhost:3306)/dbname" \
-    "data/20251111_land_rot.txt" \
-    1000
+    -file "data/land_address.txt" \
+    -type land \
+    -batch 1000
+
+# DSN 직접 지정하는 경우
+./scripts/import.sh \
+    -dsn "user:pass@tcp(localhost:3306)/dbname" \
+    -file "data/road_address.txt" \
+    -type road \
+    -batch 1000
 ```
 
-스크립트가 자동으로:
+**스크립트 자동 기능**:
 - ✅ 파일 존재 확인
 - ✅ 파일 정보 출력 (크기, 라인 수)
 - ✅ 바이너리 자동 빌드
 - ✅ 진행 상황 표시
 - ✅ 성공/실패 결과 출력
 
-### CLI 도구
+⚠️ **중요**: Import 시 **기존 데이터가 자동으로 삭제**(TRUNCATE)되고 새 데이터로 대체됩니다. 이는 우체국 데이터가 전체 스냅샷 방식으로 제공되기 때문입니다.
+
+### 3. CLI 도구로 Import
 
 수동으로 빌드하여 사용:
 
@@ -262,22 +293,29 @@ curl "http://localhost:8080/api/v1/postal-codes/land/search?sido_name=강원&eup
 cd cmd/postalcode-import
 go build -o postalcode-import
 
-# 도로명주소 데이터 import
+# 도로명주소 데이터 import (.env 파일 사용)
 ./postalcode-import \
-    -dsn "user:pass@tcp(localhost:3306)/dbname" \
-    -file "data/20251111_road_name.txt" \
+    -file "data/road_address.txt" \
     -type road \
     -batch 1000
 
-# 지번주소 데이터 import
+# 지번주소 데이터 import (DSN 직접 지정)
 ./postalcode-import \
     -dsn "user:pass@tcp(localhost:3306)/dbname" \
-    -file "data/20251111_land_rot.txt" \
+    -file "data/land_address.txt" \
     -type land \
     -batch 1000
 ```
 
-### 프로그래밍
+**플래그 설명**:
+- `-file`: 데이터 파일 경로 (필수)
+- `-type`: 데이터 타입 - `road` (도로명주소) 또는 `land` (지번주소) (필수)
+- `-dsn`: MySQL DSN (선택, 없으면 .env 파일 사용)
+- `-batch`: 배치 처리 크기 (기본값: 1000)
+
+⚠️ **주의**: Import는 항상 기존 데이터를 TRUNCATE한 후 새 데이터를 삽입합니다.
+
+### 4. 프로그래밍 방식으로 Import
 
 ```go
 import postalcodeapi "github.com/epicsagas/korean-postalcode/pkg/postalcode"
@@ -288,12 +326,17 @@ progressFn := func(current, total int) {
     fmt.Printf("Progress: %d/%d\n", current, total)
 }
 
-// 도로명주소 import
+// 도로명주소 import (기존 데이터 자동 TRUNCATE)
 result, err := importer.ImportFromFile("road_data.txt", 1000, progressFn)
 
-// 지번주소 import
+// 지번주소 import (기존 데이터 자동 TRUNCATE)
 landResult, err := importer.ImportLandFromFile("land_data.txt", 1000, progressFn)
 ```
+
+💡 **Import 동작**:
+- Import는 항상 기존 테이블 데이터를 TRUNCATE한 후 새 데이터를 삽입합니다
+- 도로명주소(`ImportFromFile`)와 지번주소(`ImportLandFromFile`)는 각각 독립적인 테이블을 사용합니다
+- 부분 업데이트가 필요한 경우 `service.Upsert()` 또는 `service.BatchUpsert()` 메서드를 사용하세요
 
 ## 🗄️ 데이터베이스 설정
 

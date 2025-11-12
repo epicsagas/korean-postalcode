@@ -29,6 +29,9 @@ type Service interface {
 	// ExtractZipPrefix는 우편번호에서 앞 3자리를 추출합니다.
 	ExtractZipPrefix(zipCode string) string
 
+	// TruncateRoad는 도로명주소 테이블의 모든 데이터를 삭제합니다.
+	TruncateRoad() error
+
 	// 지번주소 관련 메서드
 	// GetLandByZipCode는 우편번호로 지번주소를 조회합니다.
 	GetLandByZipCode(zipCode string) ([]postalcode.PostalCodeLand, error)
@@ -44,6 +47,9 @@ type Service interface {
 
 	// BatchUpsertLand는 여러 지번주소 데이터를 배치로 생성/업데이트합니다.
 	BatchUpsertLand(lands []postalcode.PostalCodeLand) error
+
+	// TruncateLand는 지번주소 테이블의 모든 데이터를 삭제합니다.
+	TruncateLand() error
 }
 
 // service는 Service 인터페이스 구현입니다.
@@ -208,6 +214,11 @@ func (s *service) validate(road *postalcode.PostalCodeRoad) error {
 	return nil
 }
 
+// TruncateRoad는 도로명주소 테이블의 모든 데이터를 삭제합니다.
+func (s *service) TruncateRoad() error {
+	return s.repo.TruncateRoad()
+}
+
 // ============================================================
 // 지번주소 관련 메서드
 // ============================================================
@@ -355,4 +366,9 @@ func (s *service) validateLand(land *postalcode.PostalCodeLand) error {
 		return fmt.Errorf("eupmyeondong name is required")
 	}
 	return nil
+}
+
+// TruncateLand는 지번주소 테이블의 모든 데이터를 삭제합니다.
+func (s *service) TruncateLand() error {
+	return s.repo.TruncateLand()
 }
