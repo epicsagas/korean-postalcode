@@ -2,6 +2,10 @@ module github.com/epicsagas/korean-postalcode
 
 go 1.23.0
 
+retract (
+	v0.1.0
+)
+
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/joho/godotenv v1.5.1
