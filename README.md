@@ -3,8 +3,10 @@
 한국 우편번호, 도로명주소 및 지번주소 데이터를 관리하는 재사용 가능한 Go 패키지입니다.
 
 [![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat&logo=go)](https://go.dev/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Go Reference](https://pkg.go.dev/badge/github.com/epicsagas/korean-postalcode.svg)](https://pkg.go.dev/github.com/epicsagas/korean-postalcode)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/epicsagas/korean-postalcode)](https://goreportcard.com/report/github.com/epicsagas/korean-postalcode)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/epicsaga)
 
 ## ✨ 특징
 
