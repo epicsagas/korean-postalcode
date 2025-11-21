@@ -2,6 +2,8 @@ module github.com/epicsagas/korean-postalcode
 
 go 1.23.0
 
+// License: Apache-2.0
+
 retract (
 	v0.1.0
 )
