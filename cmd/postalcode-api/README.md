@@ -285,4 +285,6 @@ docker run -p 8080:8080 --env-file .env postalcode-api
 
 ## 📝 라이센스
 
-MIT License
+Apache License 2.0
+
+Copyright (c) 2024 [epicsagas](https://github.com/epicsagas)

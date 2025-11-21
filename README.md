@@ -4,7 +4,7 @@
 
 [![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat&logo=go)](https://go.dev/)
 [![Go Reference](https://pkg.go.dev/badge/github.com/epicsagas/korean-postalcode.svg)](https://pkg.go.dev/github.com/epicsagas/korean-postalcode)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Go Report Card](https://goreportcard.com/badge/github.com/epicsagas/korean-postalcode)](https://goreportcard.com/report/github.com/epicsagas/korean-postalcode)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/epicsaga)
 
@@ -529,7 +529,9 @@ Issues와 Pull Requests를 환영합니다!
 
 ## 📝 라이센스
 
-MIT License - 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
+Apache License 2.0 - 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
+
+Copyright (c) 2024 [epicsagas](https://github.com/epicsagas)
 
 ---
 
