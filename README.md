@@ -6,6 +6,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/epicsagas/korean-postalcode.svg)](https://pkg.go.dev/github.com/epicsagas/korean-postalcode)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Go Report Card](https://goreportcard.com/badge/github.com/epicsagas/korean-postalcode)](https://goreportcard.com/report/github.com/epicsagas/korean-postalcode)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/epicsaga)
 
 ## ✨ 특징
 
@@ -43,12 +44,14 @@ go build -o postalcode-migrate cmd/postalcode-migrate/main.go
 ```
 
 **Migration 명령어**:
+
 - `up`: 테이블 생성
 - `down`: 테이블 삭제
 - `fresh`: 테이블 재생성 (삭제 후 생성)
 - `status`: 테이블 상태 및 데이터 개수 확인
 
 **DSN 설정**:
+
 - `-dsn` 플래그 사용 (우선순위 1)
 - `.env` 파일 자동 로드 (우선순위 2)
 
@@ -141,6 +144,7 @@ go build -o postalcode-api
 ```
 
 **자동으로 제공되는 기능**:
+
 - ✅ 도로명주소 & 지번주소 API 엔드포인트
 - ✅ Swagger UI 문서 (http://localhost:8080/swagger/index.html)
 - ✅ CORS 지원
@@ -153,11 +157,13 @@ go build -o postalcode-api
 ### Swagger API 문서
 
 API 서버 실행 후 브라우저에서 접속:
+
 ```
 http://localhost:8080/swagger/index.html
 ```
 
 **Swagger 문서 재생성**:
+
 ```bash
 # swag CLI 설치 (최초 1회)
 go install github.com/swaggo/swag/cmd/swag@v1.8.12
@@ -200,13 +206,14 @@ http.ListenAndServe(":8080", mux)
 
 ### 도로명주소 API
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/road/zipcode/{code}` | GET | 우편번호로 정확히 조회 (5자리) |
-| `/road/prefix/{prefix}` | GET | 우편번호 앞 3자리로 빠른 검색 (권장) |
-| `/road/search` | GET | 복합 검색 (시도, 시군구, 도로명) |
+| Endpoint                  | Method | Description                          |
+| ------------------------- | ------ | ------------------------------------ |
+| `/road/zipcode/{code}`  | GET    | 우편번호로 정확히 조회 (5자리)       |
+| `/road/prefix/{prefix}` | GET    | 우편번호 앞 3자리로 빠른 검색 (권장) |
+| `/road/search`          | GET    | 복합 검색 (시도, 시군구, 도로명)     |
 
 **Example:**
+
 ```bash
 curl http://localhost:8080/api/v1/postal-codes/road/zipcode/01000
 curl http://localhost:8080/api/v1/postal-codes/road/prefix/010
@@ -215,13 +222,14 @@ curl "http://localhost:8080/api/v1/postal-codes/road/search?sido_name=서울&lim
 
 ### 지번주소 API
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/land/zipcode/{code}` | GET | 우편번호로 지번주소 조회 (5자리) |
-| `/land/prefix/{prefix}` | GET | 우편번호 앞 3자리로 빠른 검색 (권장) |
-| `/land/search` | GET | 복합 검색 (시도, 시군구, 읍면동, 리명) |
+| Endpoint                  | Method | Description                            |
+| ------------------------- | ------ | -------------------------------------- |
+| `/land/zipcode/{code}`  | GET    | 우편번호로 지번주소 조회 (5자리)       |
+| `/land/prefix/{prefix}` | GET    | 우편번호 앞 3자리로 빠른 검색 (권장)   |
+| `/land/search`          | GET    | 복합 검색 (시도, 시군구, 읍면동, 리명) |
 
 **Example:**
+
 ```bash
 curl http://localhost:8080/api/v1/postal-codes/land/zipcode/25627
 curl http://localhost:8080/api/v1/postal-codes/land/prefix/256
@@ -237,10 +245,12 @@ curl "http://localhost:8080/api/v1/postal-codes/land/search?sido_name=강원&eup
 **다운로드 링크**: [우체국 우편번호 서비스](https://www.epost.go.kr/search/zipcode/areacdAddressDown.jsp)
 
 **다운로드 방법**:
+
 1. 위 링크 접속
 2. **"범위주소 DB"** 다운로드 후 압축해제
 
 **파일 준비**:
+
 ```bash
 # 프로젝트의 data 디렉토리에 다운로드한 파일 복사
 cp ~/Downloads/도로명주소*.txt data/road_address.txt
@@ -248,6 +258,7 @@ cp ~/Downloads/지번주소*.txt data/land_address.txt
 ```
 
 💡 **참고**:
+
 - 우체국 사이트의 파일명은 날짜별로 다를 수 있습니다 (예: `20251111_도로명주소.txt`)
 - 파일 형식은 파이프(`|`) 구분자를 사용하는 TXT 파일입니다
 - 파일 크기가 클 수 있으므로 (수백 MB), 다운로드에 시간이 걸릴 수 있습니다
@@ -278,6 +289,7 @@ cp ~/Downloads/지번주소*.txt data/land_address.txt
 ```
 
 **스크립트 자동 기능**:
+
 - ✅ 파일 존재 확인
 - ✅ 파일 정보 출력 (크기, 라인 수)
 - ✅ 바이너리 자동 빌드
@@ -309,6 +321,7 @@ go build -o postalcode-import
 ```
 
 **플래그 설명**:
+
 - `-file`: 데이터 파일 경로 (필수)
 - `-type`: 데이터 타입 - `road` (도로명주소) 또는 `land` (지번주소) (필수)
 - `-dsn`: MySQL DSN (선택, 없으면 .env 파일 사용)
@@ -335,6 +348,7 @@ landResult, err := importer.ImportLandFromFile("land_data.txt", 1000, progressFn
 ```
 
 💡 **Import 동작**:
+
 - Import는 항상 기존 테이블 데이터를 TRUNCATE한 후 새 데이터를 삽입합니다
 - 도로명주소(`ImportFromFile`)와 지번주소(`ImportLandFromFile`)는 각각 독립적인 테이블을 사용합니다
 - 부분 업데이트가 필요한 경우 `service.Upsert()` 또는 `service.BatchUpsert()` 메서드를 사용하세요
@@ -364,11 +378,11 @@ mysql -u user -p database < migrations/create_postal_code_lands.sql
 
 31만건 데이터 기준:
 
-| 검색 방법 | 실행시간 | 인덱스 |
-|-----------|---------|--------|
-| `zip_prefix = '010'` | ~1-5ms | idx_zip_prefix ✅ |
-| `zip_code LIKE '010%'` | ~5-15ms | idx_zipcode |
-| `zip_code = '01000'` | ~1-3ms | idx_zipcode ✅ |
+| 검색 방법                | 실행시간 | 인덱스            |
+| ------------------------ | -------- | ----------------- |
+| `zip_prefix = '010'`   | ~1-5ms   | idx_zip_prefix ✅ |
+| `zip_code LIKE '010%'` | ~5-15ms  | idx_zipcode       |
+| `zip_code = '01000'`   | ~1-3ms   | idx_zipcode ✅    |
 
 **권장**: 우편번호 앞 3자리 검색은 `GetByZipPrefix()` 사용
 
